@@ -44,23 +44,32 @@ if submit and user_input:
 if 'image_url' in st.session_state:
     st.image(st.session_state.image_url)
 
-# 사용자에게 앨범 정보를 입력받습니다.
+# 사용자에게 앨범 정보를 입력받기.
 atitle = st.text_input("앨범 제목")
 atype_options = ["App", "Card", "Web"]
 atype = st.radio("앨범 유형 선택", atype_options)
 anote = st.text_input("앨범 설명")
 save_button = st.button("장고에 저장")
 
+
 if save_button:
-    django_api_endpoint = "http://backend-svc:8080/api/album_insert/"
-    response = requests.post(django_api_endpoint, data={
+    django_api_endpoint = "http://localhost/api/album_insert/"
+
+    # 이미지 데이터를 가져옵니다.
+    image_data = requests.get(st.session_state.image_url).content
+
+    files = {"ufile": ("image.jpg", image_data)}
+
+    response = requests.post(django_api_endpoint, files=files, data={
         "a_title": atitle,
         "a_type": atype,
         "a_note": anote,
-        "ufile": st.session_state.image_url
     })
 
-    if response.json().get("success"):
-        st.success(response.json().get("message"))
+    if response.status_code == 200:
+        if response.json().get("success"):
+            st.success(response.json().get("message"))
+        else:
+            st.error("이미지 저장에 실패했습니다.")
     else:
-        st.error("이미지 저장에 실패했습니다.")
+        st.error(f"서버 오류: {response.status_code}")
