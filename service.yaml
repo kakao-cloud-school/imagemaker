@@ -8,6 +8,6 @@ spec:
   - port: 8501
     targetPort: 8501
     port: 8501
-    nodePort: 34321
+    nodePort: 32500
   selector:
     app: imagemaker
